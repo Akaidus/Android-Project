@@ -1,6 +1,7 @@
 using System;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Serialization;
 using Random = UnityEngine.Random;
 
 public class CowSound : MonoBehaviour
@@ -8,8 +9,8 @@ public class CowSound : MonoBehaviour
     //Visual debug på tlf
     [SerializeField] TextMeshProUGUI text;
 
-    [SerializeField] GameObject ControlsPromt;
-    [SerializeField] GameObject HomeMenu;
+    [SerializeField] GameObject controlsPromt;
+    [SerializeField] GameObject homeMenu;
     
     [SerializeField] RectTransform cowImage;
     AudioSource moo;
@@ -101,28 +102,28 @@ public class CowSound : MonoBehaviour
     
     public void OpenControls()
     {
-        ControlsPromt.SetActive(true);
+        controlsPromt.SetActive(true);
     }
     
     public void CloseControls()
     {
-        ControlsPromt.SetActive(false);
+        controlsPromt.SetActive(false);
     }
 
     public void UseGyro()
     {
         usingGyro = true;
         usingAcceleration = false;
-        ControlsPromt.SetActive(false);
-        HomeMenu.SetActive(false);
+        controlsPromt.SetActive(false);
+        homeMenu.SetActive(false);
     }
     
     public void UseAcceleration()
     {
         usingAcceleration = true;
         usingGyro = false;
-        ControlsPromt.SetActive(false);
-        HomeMenu.SetActive(false);
+        controlsPromt.SetActive(false);
+        homeMenu.SetActive(false);
     }
     
     public void EnableGyroDebug()
