@@ -7,26 +7,36 @@ public class CowSound : MonoBehaviour
 {
     //Visual debug på tlf
     [SerializeField] TextMeshProUGUI text;
+
+    [SerializeField] GameObject ControlsPromt;
+    [SerializeField] GameObject HomeMenu;
     
     [SerializeField] RectTransform cowImage;
     AudioSource moo;
-    
+
+    float initAccel;
     Quaternion initRot;
     float normalizePitch = .8f;
-    float pitchModifier = 1.4f;
     float newPitch;
+    float maxPitch = 1.5f;
+    float minPitch = .5f;
     float tfRnd;
+    bool usingAcceleration;
+    bool usingGyro;
     bool gyroDebug;
-    
+
     void Start()
     {
         moo = GetComponent<AudioSource>();
         Input.gyro.enabled = true;
+        initAccel = Input.acceleration.x;
     }
 
     void Update()
     {
-        PitchChangeOnRotation();
+        PitchChangeOnAcceleration();
+        PitchChangeOnGyro();
+        AnimationOnSound();
         GyroDebug();
     }
     
@@ -35,15 +45,41 @@ public class CowSound : MonoBehaviour
         moo.Play();
     }
 
-    void PitchChangeOnRotation()
+    void PitchChangeOnAcceleration()
     {
-        initRot = Input.gyro.attitude;
-        float newPitch = (normalizePitch + initRot.y) * pitchModifier; 
-        newPitch = newPitch > 1.5f ? 1.5f : newPitch;
-        newPitch = newPitch < .5f ? .5f : newPitch;
-        moo.pitch = newPitch;
+        if (!usingAcceleration) return;
+        float xAccel = Input.acceleration.x;
+        newPitch = (normalizePitch + xAccel);
+        float shakeThreshold = .05f;
+        float pitchModifier = .01f;
+        //Moving left
+        if (xAccel < -shakeThreshold)
+            newPitch -= pitchModifier;
+        //Moving right
+        else if (xAccel > shakeThreshold)
+            newPitch += pitchModifier;
+        //No movement
+        else
+            newPitch = 1f;
         
-        //Distorts image
+        newPitch = newPitch > maxPitch ? maxPitch : newPitch;
+        newPitch = newPitch < minPitch ? minPitch : newPitch;
+        moo.pitch = newPitch;
+    }
+    
+    void PitchChangeOnGyro()
+    {
+        if (!usingGyro) return;
+        initRot = Input.gyro.attitude;
+        float pitchModifier = 1.4f;
+        newPitch = (normalizePitch + initRot.y) * pitchModifier; 
+        newPitch = newPitch > maxPitch ? maxPitch : newPitch;
+        newPitch = newPitch < minPitch ? minPitch : newPitch;
+        moo.pitch = newPitch;
+    }
+
+    void AnimationOnSound()
+    {
         if (moo.isPlaying && Math.Abs(newPitch - 1f) > .05f)
         {
             if (newPitch > 1.1f)
@@ -63,6 +99,32 @@ public class CowSound : MonoBehaviour
         text.text = moo.pitch.ToString("0.00");
     }
     
+    public void OpenControls()
+    {
+        ControlsPromt.SetActive(true);
+    }
+    
+    public void CloseControls()
+    {
+        ControlsPromt.SetActive(false);
+    }
+
+    public void UseGyro()
+    {
+        usingGyro = true;
+        usingAcceleration = false;
+        ControlsPromt.SetActive(false);
+        HomeMenu.SetActive(false);
+    }
+    
+    public void UseAcceleration()
+    {
+        usingAcceleration = true;
+        usingGyro = false;
+        ControlsPromt.SetActive(false);
+        HomeMenu.SetActive(false);
+    }
+    
     public void EnableGyroDebug()
     {
         if (!gyroDebug)
@@ -76,4 +138,5 @@ public class CowSound : MonoBehaviour
             gyroDebug = false;
         }
     }
+
 }
