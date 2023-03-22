@@ -9,7 +9,6 @@ public class CowSound : MonoBehaviour
     //Visual debug på tlf
     [SerializeField] TextMeshProUGUI text;
 
-    [SerializeField] GameObject controlsPromt;
     [SerializeField] GameObject homeMenu;
     
     [SerializeField] RectTransform cowImage;
@@ -23,7 +22,7 @@ public class CowSound : MonoBehaviour
     float minPitch = .5f;
     float tfRnd;
     bool usingAcceleration;
-    bool usingGyro;
+    bool isUsingGyro;
     bool gyroDebug;
 
     void Start()
@@ -35,7 +34,6 @@ public class CowSound : MonoBehaviour
 
     void Update()
     {
-        PitchChangeOnAcceleration();
         PitchChangeOnGyro();
         AnimationOnSound();
         GyroDebug();
@@ -46,31 +44,9 @@ public class CowSound : MonoBehaviour
         moo.Play();
     }
 
-    void PitchChangeOnAcceleration()
-    {
-        if (!usingAcceleration) return;
-        float xAccel = Input.acceleration.x;
-        newPitch = (normalizePitch + xAccel);
-        float shakeThreshold = .05f;
-        float pitchModifier = .01f;
-        //Moving left
-        if (xAccel < -shakeThreshold)
-            newPitch -= pitchModifier;
-        //Moving right
-        else if (xAccel > shakeThreshold)
-            newPitch += pitchModifier;
-        //No movement
-        else
-            newPitch = 1f;
-        
-        newPitch = newPitch > maxPitch ? maxPitch : newPitch;
-        newPitch = newPitch < minPitch ? minPitch : newPitch;
-        moo.pitch = newPitch;
-    }
-    
     void PitchChangeOnGyro()
     {
-        if (!usingGyro) return;
+        if (!isUsingGyro) return;
         initRot = Input.gyro.attitude;
         float pitchModifier = 1.4f;
         newPitch = (normalizePitch + initRot.y) * pitchModifier; 
@@ -95,37 +71,11 @@ public class CowSound : MonoBehaviour
     
     void GyroDebug()
     {
-        //Visual debug på tlf
+        //aflæs gyro værdi
         if (!gyroDebug) return;
         text.text = moo.pitch.ToString("0.00");
     }
-    
-    public void OpenControls()
-    {
-        controlsPromt.SetActive(true);
-    }
-    
-    public void CloseControls()
-    {
-        controlsPromt.SetActive(false);
-    }
 
-    public void UseGyro()
-    {
-        usingGyro = true;
-        usingAcceleration = false;
-        controlsPromt.SetActive(false);
-        homeMenu.SetActive(false);
-    }
-    
-    public void UseAcceleration()
-    {
-        usingAcceleration = true;
-        usingGyro = false;
-        controlsPromt.SetActive(false);
-        homeMenu.SetActive(false);
-    }
-    
     public void EnableGyroDebug()
     {
         if (!gyroDebug)
