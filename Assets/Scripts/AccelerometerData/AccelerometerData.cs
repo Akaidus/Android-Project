@@ -1,5 +1,3 @@
-using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using TMPro;
@@ -11,11 +9,11 @@ public class AccelerometerData : MonoBehaviour
 
     AudioSource sound;
     int attempt;
-    float rawAccelReading;
+    Vector3 rawAccelReading;
     float time;
     bool isRecording;
-    List<float> accelData = new ();
-    List<float> fullaccelData = new();
+    List<Vector3> accelData = new ();
+    List<Vector3> fullaccelData = new();
 
     void Awake()
     {
@@ -37,10 +35,8 @@ public class AccelerometerData : MonoBehaviour
     void DataIsRecording()
     {
         if (!isRecording) return;
-        rawAccelReading = Input.acceleration.y;
+        rawAccelReading = Input.acceleration;
         accelData.Add(rawAccelReading);
-        //float testData = Random.Range(0, 100);
-        //accelData.Add(testData);
         time -= Time.deltaTime;
         if (time >= 0) return;
         isRecording = false;
@@ -52,7 +48,7 @@ public class AccelerometerData : MonoBehaviour
     {
         attempt += 1;
         string dataFile = Path.Combine(Application.persistentDataPath, $"Accelerometer_Data{attempt}.cvs");
-        StreamWriter streamWriter = new StreamWriter(dataFile);
+        StreamWriter streamWriter = new StreamWriter(dataFile, true);
         foreach (var n in accelData)
         {
             streamWriter.WriteLine(n);
