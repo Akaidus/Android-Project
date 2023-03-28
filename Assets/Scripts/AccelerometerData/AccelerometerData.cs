@@ -12,54 +12,56 @@ public class AccelerometerData : MonoBehaviour
     Vector3 rawAccelReading;
     float time;
     bool isRecording;
-    List<Vector3> accelData = new ();
-    List<Vector3> fullaccelData = new();
+    List<float> timeList = new ();
+    List<Vector3> accelList = new ();
 
     void Awake()
     {
         sound = GetComponent<AudioSource>();
     }
 
-    void Update()
+    void FixedUpdate()
     {
         DataIsRecording();
     }
 
     public void BeginRecording()
     {
-        time = .7f;
+        time = 0f;
         isRecording = true;
-        accelData.Clear();
+        accelList.Clear();
     }
 
     void DataIsRecording()
     {
         if (!isRecording) return;
+        time += Time.deltaTime;
         rawAccelReading = Input.acceleration;
-        accelData.Add(rawAccelReading);
-        time -= Time.deltaTime;
-        if (time >= 0) return;
-        isRecording = false;
-        StopRecording(); 
-        sound.Play();        
+        timeList.Add(time);
+        accelList.Add(rawAccelReading);
+        if (time <= 0.7f) return;
+        StopRecording();
     }
 
     void StopRecording()
     {
         attempt += 1;
-        string dataFile = Path.Combine(Application.persistentDataPath, $"Accelerometer_Data{attempt}.cvs");
+        string dataFile = Path.Combine(Application.persistentDataPath, $"Accelerometer_Data{attempt}.csv");
         StreamWriter streamWriter = new StreamWriter(dataFile, true);
-        foreach (var n in accelData)
+        streamWriter.WriteLine("Time ; x ; y ; z");
+        
+        for (int i = 0; i < accelList.Count; i++)
         {
-            streamWriter.WriteLine(n);
-            
-            GameObject newData = new GameObject();
+            streamWriter.WriteLine($"{timeList[i]:0.0000};{accelList[i].x:0.0000};{accelList[i].y:0.0000};{accelList[i].z:0.0000}");
+         
+            GameObject newData = new();
             newData.transform.SetParent(content.transform);
             TextMeshProUGUI dataText = newData.AddComponent<TextMeshProUGUI>();
-            dataText.text = n.ToString("0.00000000");
-            fullaccelData.Add(n);
+            dataText.text += $"{timeList[i]:0.0000}";
+            dataText.text += $"\n x:{accelList[i].x:0.0000}\n y:{accelList[i].y:0.0000}\n z:{accelList[i].z:0.0000}";
         }
         streamWriter.Close();
         isRecording = false;
+        sound.Play();
     }
 }
