@@ -25,7 +25,7 @@ public class GyroTo3D : MonoBehaviour
         if (!showModel)
         {
             model.SetActive(true);
-            model.transform.Rotate(90, 0, 0);
+            model.transform.rotation = Quaternion.Euler(90,0,0);
             showModel = true;
         }
         else
