@@ -4,7 +4,7 @@ using UnityEngine.Serialization;
 
 public class PlayerController : MonoBehaviour
 {
-    [FormerlySerializedAs("playerSpeed")] [SerializeField] float speed;
+    [SerializeField] float speed;
     [SerializeField] float rotSpeed;
     Vector3 moveDir = Vector3.zero;
     CharacterController controller;
